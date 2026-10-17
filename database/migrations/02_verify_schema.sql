@@ -1,15 +1,11 @@
-CREATE TABLE verification_tokens (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL,
-    token VARCHAR(64) NOT NULL,
-    expires_at TIMESTAMPTZ NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    
-    -- Llave foránea estricta hacia users con eliminación en cascada
-    CONSTRAINT fk_tokens_user FOREIGN KEY (user_id)
-        REFERENCES users(id)
-        ON DELETE CASCADE,
-        
-    -- Token estrictamente único
-    CONSTRAINT uq_tokens_token UNIQUE (token)
-);
+-- Índice para acelerar la búsqueda por correo en el Login:
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email 
+ON users(email);
+
+-- Índice para acelerar la verificación de token en el link de Resend:
+CREATE UNIQUE INDEX IF NOT EXISTS idx_tokens_token 
+ON verification_tokens(token);
+
+-- Índice para acelerar el borrado en cascada y JOINs:
+CREATE INDEX IF NOT EXISTS idx_tokens_user_id 
+ON verification_tokens(user_id);
